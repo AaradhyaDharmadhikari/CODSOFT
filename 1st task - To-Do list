@@ -1,62 +1,74 @@
-class TodoList:
-    def __init__(self):
-        self.tasks = {}
+import tkinter as tk
+from tkinter import messagebox
 
-    def add_task(self, task, priority=1):
-        self.tasks[task] = priority
+class TodoListApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("To-Do List Application")
+        self.tasks = []
 
-    def remove_task(self, task):
-        if task in self.tasks:
-            del self.tasks[task]
+        # Entry widget to input task
+        self.entry_task = tk.Entry(root, width=50)
+        self.entry_task.grid(row=0, column=0, padx=10, pady=5)
+
+        # Button to add task
+        self.button_add = tk.Button(root, text="Add Task", command=self.add_task)
+        self.button_add.grid(row=0, column=1, padx=5, pady=5)
+
+        # Listbox to display tasks
+        self.listbox_tasks = tk.Listbox(root, width=50)
+        self.listbox_tasks.grid(row=1, column=0, columnspan=2, padx=10, pady=5)
+
+        # Button to delete selected task
+        self.button_delete = tk.Button(root, text="Delete Task", command=self.delete_task)
+        self.button_delete.grid(row=2, column=0, padx=5, pady=5, sticky="WE")
+
+        # Button to update selected task
+        self.button_update = tk.Button(root, text="Update Task", command=self.update_task)
+        self.button_update.grid(row=2, column=1, padx=5, pady=5, sticky="WE")
+
+        # Populate listbox with initial tasks
+        self.update_listbox()
+
+    def add_task(self):
+        task = self.entry_task.get()
+        if task:
+            self.tasks.append(task)
+            self.update_listbox()
+            self.entry_task.delete(0, tk.END)
         else:
-            print("Task not found!")
+            messagebox.showerror("Error", "Task cannot be empty!")
 
-    def update_task_priority(self, task, priority):
-        if task in self.tasks:
-            self.tasks[task] = priority
+    def delete_task(self):
+        selected_index = self.listbox_tasks.curselection()
+        if selected_index:
+            index = selected_index[0]
+            del self.tasks[index]
+            self.update_listbox()
         else:
-            print("Task not found!")
+            messagebox.showerror("Error", "No task selected!")
 
-    def display_tasks(self):
-        if self.tasks:
-            print("To-Do List:")
-            for task, priority in sorted(self.tasks.items(), key=lambda x: x[1]):
-                print(f"{priority}: {task}")
+    def update_task(self):
+        selected_index = self.listbox_tasks.curselection()
+        if selected_index:
+            index = selected_index[0]
+            new_task = self.entry_task.get()
+            if new_task:
+                self.tasks[index] = new_task
+                self.update_listbox()
+                self.entry_task.delete(0, tk.END)
+            else:
+                messagebox.showerror("Error", "Task cannot be empty!")
         else:
-            print("No tasks in the list!")
+            messagebox.showerror("Error", "No task selected!")
 
-
-def main():
-    todo_list = TodoList()
-
-    while True:
-        print("\n1. Add Task")
-        print("2. Remove Task")
-        print("3. Update Task Priority")
-        print("4. Display Tasks")
-        print("5. Exit")
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            task = input("Enter task: ")
-            priority = int(input("Enter priority (default is 1): "))
-            todo_list.add_task(task, priority)
-            print("Task added successfully!")
-        elif choice == "2":
-            task = input("Enter task to remove: ")
-            todo_list.remove_task(task)
-        elif choice == "3":
-            task = input("Enter task to update priority: ")
-            priority = int(input("Enter new priority: "))
-            todo_list.update_task_priority(task, priority)
-        elif choice == "4":
-            todo_list.display_tasks()
-        elif choice == "5":
-            print("Exiting program...")
-            break
-        else:
-            print("Invalid choice! Please try again.")
+    def update_listbox(self):
+        self.listbox_tasks.delete(0, tk.END)
+        for task in self.tasks:
+            self.listbox_tasks.insert(tk.END, task)
 
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = TodoListApp(root)
+    root.mainloop()
